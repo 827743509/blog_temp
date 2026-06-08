@@ -1,9 +1,35 @@
-# Default ignored files
-/shelf/
-/workspace.xml
-# Editor-based HTTP Client requests
-/httpRequests/
-# Datasource local storage ignored files
-/dataSources/
-/dataSources.local.xml
-.idea
+# Maven
+target/
+*.jar
+*.war
+*.ear
+
+# Java
+*.class
+hs_err_pid*
+replay_pid*
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.project
+.classpath
+.settings/
+
+# Node
+blog_cli/node_modules/
+
+# Logs
+logs/
+*.log
+
+# Local config
+.env
+.env.*
+application-local.yml
+application-*.local.yml
+
+# OS
+.DS_Store
+Thumbs.db
