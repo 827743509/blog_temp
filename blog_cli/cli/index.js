@@ -6,6 +6,7 @@ import { createInterface } from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
 import { Command, InvalidArgumentError } from 'commander';
 import { request, ApiError } from './api.js';
+import { loginWithBrowser } from './browser-login.js';
 import { clearConfig, getConfigPath, loadConfig, saveConfig } from './config.js';
 
 const program = new Command();
@@ -15,35 +16,17 @@ program
   .description('简单博客系统 CLI 客户端')
   .version('1.0.0')
   .option('--base-url <url>', '临时指定后端服务地址');
-
 program
-  .command('login')
-  .description('登录并保存 JWT')
-  .requiredOption('-u, --username <username>', '用户名')
-  .requiredOption('-p, --password <password>', '密码')
+  .command('login-browser')
+  .description('打开浏览器登录并自动保存 JWT')
+  .option('--front-url <url>', '前端地址', 'http://127.0.0.1:5173')
   .action(run(async (options) => {
-    const globalOptions = program.opts();
-    const response = await request('/api/auth/login', {
-      method: 'POST',
-      auth: false,
-      baseUrl: globalOptions.baseUrl,
-      body: {
-        username: options.username,
-        password: options.password
-      }
-    });
     const config = await loadConfig();
-    await saveConfig({
-      ...config,
-      baseUrl: globalOptions.baseUrl || config.baseUrl,
-      token: response.data.token,
-      user: {
-        id: response.data.userId,
-        username: response.data.username,
-        nickname: response.data.nickname
-      }
+    const auth = await loginWithBrowser({
+      frontUrl: options.frontUrl,
+      baseUrl: program.opts().baseUrl || config.baseUrl
     });
-    console.log(`登录成功：${response.data.nickname || response.data.username}`);
+    console.log(`登录成功：${auth.nickname || auth.username}`);
     console.log(`配置文件：${getConfigPath()}`);
   }));
 
@@ -61,6 +44,37 @@ program
   .action(run(async () => {
     const response = await request('/api/auth/me', { baseUrl: program.opts().baseUrl });
     console.log(formatJson(response.data));
+  }));
+
+program
+  .command('login-status')
+  .alias('status')
+  .alias('check-login')
+  .description('校验 CLI 登录状态和本地 token 是否有效')
+  .action(run(async () => {
+    const config = await loadConfig();
+    if (!config.token) {
+      console.log('未登录：配置文件中没有 token');
+      console.log(`配置文件：${getConfigPath()}`);
+      process.exitCode = 1;
+      return;
+    }
+
+    try {
+      const response = await request('/api/auth/validate', { baseUrl: program.opts().baseUrl });
+      console.log('已登录：token 有效');
+      if (response.data?.user) {
+        console.log(formatJson(response.data.user));
+      }
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 401) {
+        console.log('未登录：token 无效或已过期');
+        console.log('请重新执行 blog-cli login-browser 登录');
+        process.exitCode = 1;
+        return;
+      }
+      throw error;
+    }
   }));
 
 const configCommand = program.command('config').description('管理 CLI 配置');
@@ -108,7 +122,6 @@ postCommand
   .command('create')
   .description('新增博客')
   .requiredOption('-t, --title <title>', '标题')
-  .option('-c, --content <content>', '正文')
   .option('-f, --content-file <path>', '从文件读取正文')
   .option('-s, --summary <summary>', '摘要')
   .option('--status <status>', '状态：0 草稿，1 发布', parseStatus)
@@ -129,7 +142,6 @@ postCommand
   .description('修改博客')
   .argument('<id>', '博客 ID', parsePositiveInteger)
   .requiredOption('-t, --title <title>', '标题')
-  .option('-c, --content <content>', '正文')
   .option('-f, --content-file <path>', '从文件读取正文')
   .option('-s, --summary <summary>', '摘要')
   .option('--status <status>', '状态：0 草稿，1 发布', parseStatus)

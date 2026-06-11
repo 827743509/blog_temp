@@ -19,6 +19,8 @@ replay_pid*
 
 # Node
 blog_cli/node_modules/
+blog_front/node_modules/
+blog_front/dist/
 
 # Logs
 logs/

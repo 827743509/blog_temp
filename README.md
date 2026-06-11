@@ -53,6 +53,26 @@ mvn spring-boot:run
 http://localhost:8080
 ```
 
+## Vue 前端
+
+项目内置一个 Vue 3 前端，代码位于 `blog_front/` 目录，支持注册、登录、查看公开文章、查看我的文章，以及新增、修改、删除博客。
+
+### 启动前端
+
+```bash
+cd blog_front
+npm install
+npm run dev
+```
+
+默认前端地址：
+
+```text
+http://127.0.0.1:5173
+```
+
+前端默认请求后端地址 `http://localhost:8080`，可在页面顶部修改并保存。
+
 ## 接口说明
 
 ### 注册
@@ -96,6 +116,15 @@ Authorization: Bearer <token>
 GET /api/auth/me
 Authorization: Bearer <token>
 ```
+
+### 校验 token
+
+```http
+GET /api/auth/validate
+Authorization: Bearer <token>
+```
+
+token 有效时返回 `valid: true` 和当前用户信息；token 缺失、无效或过期时返回 `401`。
 
 ### 公开文章列表
 
@@ -209,8 +238,29 @@ blog-cli --base-url http://localhost:8080 post list
 
 ```bash
 blog-cli login --username admin --password 123456
+blog-cli login-status
 blog-cli me
 blog-cli logout
+```
+
+也可以通过浏览器登录并自动把 token 保存到 CLI 配置中。使用前需要先启动 Vue 前端：
+
+```bash
+cd blog_front
+npm run dev
+```
+
+然后在另一个终端执行：
+
+```bash
+cd blog_cli
+npm run cli -- login-browser
+```
+
+如果前端地址不是默认的 `http://127.0.0.1:5173`，可以指定：
+
+```bash
+npm run cli -- login-browser --front-url http://127.0.0.1:5174
 ```
 
 ### 查看博客

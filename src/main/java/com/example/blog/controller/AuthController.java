@@ -5,6 +5,7 @@ import com.example.blog.common.CurrentUser;
 import com.example.blog.dto.AuthResponse;
 import com.example.blog.dto.LoginRequest;
 import com.example.blog.dto.RegisterRequest;
+import com.example.blog.dto.TokenValidationResponse;
 import com.example.blog.security.SecurityUtils;
 import com.example.blog.service.AuthService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,5 +36,11 @@ public class AuthController {
     @GetMapping("/me")
     public ApiResponse<CurrentUser> me() {
         return ApiResponse.ok(SecurityUtils.currentUser());
+    }
+
+    @GetMapping("/validate")
+    public ApiResponse<TokenValidationResponse> validate() {
+        CurrentUser currentUser = SecurityUtils.currentUser();
+        return ApiResponse.ok(new TokenValidationResponse(true, currentUser));
     }
 }
