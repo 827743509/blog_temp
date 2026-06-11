@@ -64,22 +64,10 @@ blog-cli login-browser
 blog-cli login-browser --front-url http://127.0.0.1:5173
 ```
 
-如果 CLI 版本支持账号密码登录：
-
-```bash
-blog-cli login --username admin --password 123456
-```
-
 查看当前用户：
 
 ```bash
 blog-cli me
-```
-
-校验当前登录状态：
-
-```bash
-blog-cli login-status
 ```
 
 退出登录：
@@ -104,12 +92,6 @@ blog-cli post mine
 
 ## 新增文章
 
-直接传正文：
-
-```bash
-blog-cli post create --title "第一篇博客" --content "这是博客正文" --summary "这是摘要" --status 1 --tags "Java,Spring"
-```
-
 从文件读取正文：
 
 ```bash
@@ -119,17 +101,12 @@ blog-cli post create --title "第一篇博客" --content-file ./post.md --summar
 参数说明：
 
 - `--title`：标题，必填。
-- `--content`：正文，和 `--content-file` 二选一。
 - `--content-file`：正文文件路径，和 `--content` 二选一。
 - `--summary`：摘要，可选。
 - `--status`：状态，可选；`0` 为草稿，`1` 为发布。
 - `--tags`：标签，可选；多个标签用英文逗号分隔。
 
 ## 修改文章
-
-```bash
-blog-cli post update 1 --title "更新后的标题" --content "更新后的正文" --summary "更新后的摘要" --status 1 --tags "Java,MyBatis"
-```
 
 从文件读取正文：
 
