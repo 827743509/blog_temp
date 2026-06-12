@@ -18,7 +18,7 @@ replay_pid*
 .settings/
 
 # Node
-blog_cli/node_modules/
+blog_cli_server/node_modules/
 blog_front/node_modules/
 blog_front/dist/
 
